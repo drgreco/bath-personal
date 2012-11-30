@@ -3,3 +3,4 @@ bathd.pid
 bath.log
 *.swp
 *.pyc
+*.pem

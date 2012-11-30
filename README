@@ -1,5 +1,7 @@
 BATH
 
+A layer of authentication to any port based service or services utilizing Apache/SSL, Python, and IPTables. This was initially designed only to address the issue of multifactor authentication with OpenSSH when forcing the user to authenticate with keys. This application handles the users authentication through Apache (over SSL), and then asks the user if they want to open the port to the desired service. Once the port is opened (via a Python daemon handling messages on the back end), the user has a predefined amount of time to log into the service before any new connections are blocked. This application is released under the Apache 2 Licence.
+
 The python files go in /var/lib/bath
 The database and pid file get created in /var/lib/bath/daemon
 
@@ -15,18 +17,22 @@ REQUIREMENTS
 
 INSTALLATION
 
-First, you need to install apache (or really, anything that honors 'REMOTE_ADDR' and 'AUTHENTICATE_UID' with ssl (because not using ssl kind of defeats the purpose). If you are using apache2, this is the config you need to make bath work (aside from ssl and all the relevant stuff for that):
+First, you need to install apache (or really, anything that honors 'REMOTE_ADDR' and 'AUTHENTICATE_UID' with ssl (because not using ssl kind of defeats the purpose). If you are using apache2, this is the config you need to make bath work (aside from ssl and all the relevant authentication stuff):
 ----------------------------------
-Alias /bath /var/lib/bath/app
+Alias / /var/lib/bath/app
 
-<Location /bath>
+<Location />
   Options FollowSymLinks
   AllowOverride None
-  DirectoryIndex bath.py
+  DirectoryIndex client.py
   AddHandler mod_python .py
   PythonHandler mod_python.publisher
 </Location>
 ----------------------------------
+
+The Bath user needs to be created (please substitute your own nologin shell or false or something)
+# useradd -s /usr/sbin/nologin bath
+
 
 These lines needs to be in the /etc/sudoers file (bath is an unprivileged user):
 ----------------------------------
