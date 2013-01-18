@@ -1,5 +1,5 @@
-BATH - a shell script that connects to a webpage using curl 
-=============================================================
+BATH - Extra authentication to any port based service via web app and iptables
+==============================================================================
 
 The python files go in _/var/lib/bath_  
 The database and pid file get created in _/var/lib/bath/daemon_
