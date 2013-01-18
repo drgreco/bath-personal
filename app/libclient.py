@@ -14,11 +14,12 @@
 # limitations under the License.
 ############################################################################
 
+import sys
 import ConfigParser
-import json
 import httplib
 
 configFile = '/var/lib/bath/client.conf'
+
 
 ##############################################################
 # returns a dictonary of the main section in the config file #
@@ -27,7 +28,7 @@ def getMainConfig():
     config = ConfigParser.ConfigParser()
     config.read(configFile)
 
-    mainConfig= dict()
+    mainConfig = dict()
 
     try:
         mainConfig['name'] = config.get('main', 'name')
@@ -40,7 +41,7 @@ def getMainConfig():
 
     for option in config.options('main'):
         mainConfig[option] = config.get('main', option)
-  
+
     return mainConfig
 
 
@@ -48,7 +49,7 @@ def getMainConfig():
 # returns a dictonary of dictionaries       #
 # containing the application config options #
 #############################################
-def getAppConfig(): 
+def getAppConfig():
     config = ConfigParser.ConfigParser()
     config.read(configFile)
     appConfig = dict()

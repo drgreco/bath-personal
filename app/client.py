@@ -32,7 +32,7 @@ def index(req, time=0, output='html'):
 
 # get username from auth
     user = get_user_name(req)
-    message=""
+    message = ""
     admin = http_get("/admin/{0}" . format(user))
 
 # Process form data if we have it
@@ -49,13 +49,13 @@ def index(req, time=0, output='html'):
                 ip = get_client_ip(req)
         else:
             ip = get_client_ip(req)
-        
-        comment= ''
+
+        comment = ""
         if not req.form['comment']:
             comment = None
         else:
             comment = urllib.quote_plus(req.form['comment'])
-            
+
         message = str(http_get("/create/{0}/{1}/{2}/{3}/{4}" . format(req.form['app'], user, ip, get_client_ip(req), comment)))
 
 # proceed with rendering the page
@@ -71,11 +71,8 @@ def index(req, time=0, output='html'):
         if output == 'html':
             req.content_type = 'text/html'
             req.write(get_html_header())
-            if admin:
-                req.write("<h3>admin: {0}</h3>" . format(admin))
-            else:
-                req.write("<h3>not admin: {0}</h3>" . format(admin))
-                
+
+# create form
             req.write("""
         <h3>{0}</h3>
         <h4>Welcome {1}: Enable service for your current IP Address</h4>
@@ -108,6 +105,7 @@ def index(req, time=0, output='html'):
         <br><br>
 """)
 
+# if admin, show active connections
             if admin:
                 req.write('''
         <table>
@@ -133,17 +131,17 @@ def index(req, time=0, output='html'):
                 <td>{3}</td>
                 <td>{4}</td>
             </tr>''' . format(current['user'],
-                                                current['app'],
-                                                current['ip'],
-                                                current['timestamp'],
-                                                current['timeleft']))
+                            current['app'],
+                            current['ip'],
+                            current['timestamp'],
+                            current['timeleft']))
                     req.write('''
         </table>
         <br><br>''')
                 except:
                     pass
 
-
+# write connection history
         req.write('''
         <table>
             <caption>Connection History</caption>
@@ -155,9 +153,10 @@ def index(req, time=0, output='html'):
                 <th>Time Left</th>
                 <th>Comment</th>
             </tr>''')
-        
+
         for connection in json.loads(http_get("/history?user={0}" . format(user))):
-            if connection['timeleft'] == False:
+            timeleft = connection['timeleft']
+            if timeleft is False:
                 req.write('''
             <tr bgcolor='lightred'>''')
             elif connection['active']:
@@ -166,7 +165,17 @@ def index(req, time=0, output='html'):
             else:
                 req.write('''
             <tr>''')
-            
+
+                timeleft = '''
+                    <form method="POST">
+                        <input type="hidden" name="ip" value={0}>
+                        <input type="hidden" name="app" value="{1}">
+                        <input type="hidden" name="comment" value="re{2}">
+                        <input type="submit" value="re-enable">
+                    </form>''' . format(connection['firewall_ip'],
+                                    connection['app'],
+                                    connection['timestamp'])
+
             req.write('''
                 <td>{0}</td>
                 <td>{1}</td>
@@ -175,15 +184,16 @@ def index(req, time=0, output='html'):
                 <td>{4}</td>
                 <td>{5}</td>
             </tr>''' . format(connection['app'],
-                                                connection['firewall_ip'],
-                                                connection['user_ip'],
-                                                connection['timestamp'],
-                                                connection['timeleft'],
-                                                connection['comment']))
+                            connection['firewall_ip'],
+                            connection['user_ip'],
+                            connection['timestamp'],
+                            timeleft,
+                            connection['comment']))
         req.write('''
         </table>
         <br><br>''')
 
+# if admin, write everyone's history
         if admin:
             req.write('''
         <table>
@@ -197,9 +207,10 @@ def index(req, time=0, output='html'):
                 <th>Time Left</th>
                 <th>Comment</th>
             </tr>''')
-        
+
             for connection in json.loads(http_get("/history")):
-                if connection['timeleft'] == False:
+                timeleft = connection['timeleft']
+                if timeleft is False:
                     req.write('''
             <tr bgcolor='lightred'>''')
                 elif connection['active']:
@@ -208,7 +219,17 @@ def index(req, time=0, output='html'):
                 else:
                     req.write('''
             <tr>''')
-            
+
+                timeleft = '''
+                    <form method="POST">
+                        <input type="hidden" name="ip" value={0}>
+                        <input type="hidden" name="app" value="{1}">
+                        <input type="hidden" name="comment" value="re{2}">
+                        <input type="submit" value="re-enable">
+                    </form>''' . format(connection['firewall_ip'],
+                                    connection['app'],
+                                    connection['timestamp'])
+
                 req.write('''
                 <td>{0}</td>
                 <td>{1}</td>
@@ -218,18 +239,17 @@ def index(req, time=0, output='html'):
                 <td>{5}</td>
                 <td>{6}</td>
             </tr>''' . format(connection['user'],
-                                                connection['app'],
-                                                connection['firewall_ip'],
-                                                connection['user_ip'],
-                                                connection['timestamp'],
-                                                connection['timeleft'],
-                                                connection['comment']))
+                            connection['app'],
+                            connection['firewall_ip'],
+                            connection['user_ip'],
+                            connection['timestamp'],
+                            timeleft,
+                            connection['comment']))
 
             req.write('''
         </table>
         <br><br>''')
 
-    
             req.write("""
     <h5><a href="bath.sh">download</a> shell script</h5>
 </html>
@@ -243,7 +263,7 @@ def index(req, time=0, output='html'):
 # returns html and header with css and all that #
 #################################################
 def get_html_header():
-  return """
+    return """
 <html>
   <head>
     <link href="style.css" rel="stylesheet" type="text/css">
